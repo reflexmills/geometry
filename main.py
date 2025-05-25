@@ -88,14 +88,12 @@ def generate_card():
             "name": "SECRET: All Geometry Dash",
             "stars": 10,
             "rarity": "Хроматическая",
-            "image_url": "https://i.imgur.com/secret.jpg"
         }
     
     return {
         "name": card["name"],
         "stars": stars,
         "rarity": rarity,
-        "image_url": f"https://i.imgur.com/{card['name'].lower().replace(' ', '')}.jpg"
     }
 
 # Обработчики
@@ -110,8 +108,7 @@ async def start(message: types.Message):
     )
     conn.commit()
     
-    await message.answer_photo(
-        photo="https://i.imgur.com/gd_welcome.jpg",
+    await message.(
         caption=f"🎮 Привет, {username}!\n\n"
                "Это бот для коллекционирования карт из Geometry Dash!\n"
                "Получай карты уровней и соревнуйся с другими игроками.",
@@ -152,7 +149,7 @@ async def get_card(message: types.Message):
     
     # Отправка
     rarity_emoji = RARITIES[card["rarity"]]["emoji"]
-    await message.answer_photo(
+    await message.(
         photo=card["image_url"],
         caption=f"🎴 Новая карта!\n\n"
                f"▸ {card['name']}\n"
