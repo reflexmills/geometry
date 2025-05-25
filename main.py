@@ -39,7 +39,6 @@ CREATE TABLE IF NOT EXISTS cards (
     name TEXT,
     stars INTEGER,
     rarity TEXT,
-    image_url TEXT,
     FOREIGN KEY (user_id) REFERENCES users (user_id)
 )
 ''')
@@ -108,10 +107,10 @@ async def start(message: types.Message):
     )
     conn.commit()
     
-    await message(
-        caption=f"🎮 Привет, {username}!\n\n"
-               "Это бот для коллекционирования карт из Geometry Dash!\n"
-               "Получай карты уровней и соревнуйся с другими игроками.",
+    await message.answer(
+        f"🎮 Привет, {username}!\n\n"
+        "Это бот для коллекционирования карт из Geometry Dash!\n"
+        "Получай карты уровней и соревнуйся с другими игроками.",
         reply_markup=main_keyboard()
     )
 
@@ -119,9 +118,10 @@ async def start(message: types.Message):
 async def get_card(message: types.Message):
     user_id = message.from_user.id
     
-   # Проверка таймера (4 часа)
+    # Проверка таймера (4 часа)
     cursor.execute('SELECT last_card_time FROM users WHERE user_id = ?', (user_id,))
-    last_time = cursor.fetchone()[0]
+    result = cursor.fetchone()
+    last_time = result[0] if result else 0
     
     if time.time() - last_time < 4 * 3600:
         wait_time = int(4 * 3600 - (time.time() - last_time))
@@ -138,8 +138,8 @@ async def get_card(message: types.Message):
     
     # Сохранение
     cursor.execute(
-        'INSERT INTO cards (user_id, name, stars, rarity, image_url) VALUES (?, ?, ?, ?, ?)',
-        (user_id, card["name"], card["stars"], card["rarity"], card["image_url"])
+        'INSERT INTO cards (user_id, name, stars, rarity) VALUES (?, ?, ?, ?)',
+        (user_id, card["name"], card["stars"], card["rarity"])
     )
     cursor.execute(
         'UPDATE users SET last_card_time = ?, collection_score = collection_score + ? WHERE user_id = ?',
@@ -149,13 +149,12 @@ async def get_card(message: types.Message):
     
     # Отправка
     rarity_emoji = RARITIES[card["rarity"]]["emoji"]
-    await message(
-        photo=card["image_url"],
-        caption=f"🎴 Новая карта!\n\n"
-               f"▸ {card['name']}\n"
-               f"▸ {rarity_emoji} {card['rarity']}\n"
-               f"▸ ⭐ {card['stars']}/10\n\n"
-               f"Следующая карта через 4 часа",
+    await message.answer(
+        f"🎴 Новая карта!\n\n"
+        f"▸ {card['name']}\n"
+        f"▸ {rarity_emoji} {card['rarity']}\n"
+        f"▸ ⭐ {card['stars']}/10\n\n"
+        f"Следующая карта через 4 часа",
         reply_markup=main_keyboard()
     )
 
@@ -181,7 +180,7 @@ async def show_collection(message: types.Message):
     
     for rarity, count, score in stats:
         emoji = RARITIES[rarity]["emoji"]
-        text += f"{emoji} {rarity}: {count} карт (⭐ {score})\n"
+        text += f"{emoji} {rarity}: {count} карт (⭐ {score or 0})\n"
         total_cards += count
         total_score += score or 0
     
@@ -203,7 +202,7 @@ async def leaderboard(message: types.Message):
     text = "🏆 Топ игроков:\n\n"
     
     for i, (name, cards, score) in enumerate(top, 1):
-        text += f"{i}. {name}: {cards} карт (⭐ {score})\n"
+        text += f"{i}. {name}: {cards} карт (⭐ {score or 0})\n"
     
     await message.answer(text, reply_markup=main_keyboard())
 
@@ -221,17 +220,22 @@ async def profile(message: types.Message):
         WHERE user_id = ?
     ''', (user_id, user_id, user_id, user_id))
     
-    username, total_cards, total_score, unique_cards = cursor.fetchone()
+    result = cursor.fetchone()
+    if not result:
+        await message.answer("Профиль не найден!", reply_markup=main_keyboard())
+        return
+    
+    username, total_cards, total_score, unique_cards = result
     
     await message.answer(
         f"👤 {username}\n\n"
-        f"▸ Всего карт: {total_cards}\n"
-        f"▸ Уникальных: {unique_cards}\n"
+        f"▸ Всего карт: {total_cards or 0}\n"
+        f"▸ Уникальных: {unique_cards or 0}\n"
         f"▸ Очки коллекции: ⭐ {total_score or 0}\n\n"
         f"Редкости: {', '.join(RARITIES.keys())}",
         reply_markup=main_keyboard()
     )
 
-if __name__ == '__main__':
+if name == 'main':
     import asyncio
     asyncio.run(dp.start_polling(bot))
