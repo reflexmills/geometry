@@ -155,7 +155,7 @@ async def show_profile(callback: types.CallbackQuery):
     )
     await callback.answer()
 
-if name == 'main':
+if __name__ == '__main__':
     from aiogram.enums import ParseMode
     import asyncio
     
