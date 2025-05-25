@@ -131,7 +131,7 @@ async def get_card(message: types.Message):
         hours = wait_time // 3600
 
 mins = (wait_time % 3600) // 60
-        await message.answer(
+    await message.answer(
             f"⏳ Следующая карта будет доступна через {hours}ч {mins}мин",
             reply_markup=main_keyboard()
         )
