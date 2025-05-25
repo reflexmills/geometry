@@ -108,7 +108,7 @@ async def start(message: types.Message):
     )
     conn.commit()
     
-    await message.(
+    await message(
         caption=f"🎮 Привет, {username}!\n\n"
                "Это бот для коллекционирования карт из Geometry Dash!\n"
                "Получай карты уровней и соревнуйся с другими игроками.",
@@ -149,7 +149,7 @@ async def get_card(message: types.Message):
     
     # Отправка
     rarity_emoji = RARITIES[card["rarity"]]["emoji"]
-    await message.(
+    await message(
         photo=card["image_url"],
         caption=f"🎴 Новая карта!\n\n"
                f"▸ {card['name']}\n"
