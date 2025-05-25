@@ -129,7 +129,6 @@ async def get_card(message: types.Message):
     if time.time() - last_time < 4 * 3600:
         wait_time = int(4 * 3600 - (time.time() - last_time))
         hours = wait_time // 3600
-        👨‍💻 Администратор отвечает:
 
 mins = (wait_time % 3600) // 60
         await message.answer(
