@@ -113,7 +113,7 @@ async def get_card(callback: types.CallbackQuery):
 @dp.callback_query(F.data == "my_collection")
 async def show_collection(callback: types.CallbackQuery):
     user_id = callback.from_user.id
-  cursor.execute('SELECT name, stars, rarity FROM cards WHERE user_id = ?', (user_id,))
+    cursor.execute('SELECT name, stars, rarity FROM cards WHERE user_id = ?', (user_id,))
     cards = cursor.fetchall()
     
     if not cards:
