@@ -122,16 +122,15 @@ async def start(message: types.Message):
 async def get_card(message: types.Message):
     user_id = message.from_user.id
     
-    # Проверка таймера (4 часа)
+   # Проверка таймера (4 часа)
     cursor.execute('SELECT last_card_time FROM users WHERE user_id = ?', (user_id,))
     last_time = cursor.fetchone()[0]
     
     if time.time() - last_time < 4 * 3600:
         wait_time = int(4 * 3600 - (time.time() - last_time))
         hours = wait_time // 3600
-
-mins = (wait_time % 3600) // 60
-    await message.answer(
+        mins = (wait_time % 3600) // 60
+        await message.answer(
             f"⏳ Следующая карта будет доступна через {hours}ч {mins}мин",
             reply_markup=main_keyboard()
         )
